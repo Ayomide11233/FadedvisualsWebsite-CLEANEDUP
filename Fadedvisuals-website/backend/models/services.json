@@ -1,0 +1,175 @@
+[
+  {
+    "package": "Branding Package",
+    "tier": "Basic",
+    "deliverables": [
+      "Custom logo (2 concepts)",
+      "3 revision rounds",
+      "PNG & SVG source files",
+      "Brand colour palette",
+      "7-day delivery"
+    ],
+    "revisions": 2,
+    "price": 150,
+    "description": "Starter branding for personal brands and early-stage businesses"
+  },
+  {
+    "package": "Branding Package",
+    "tier": "Premium",
+    "deliverables": [
+      "Brand colour palette",
+      "Everything in Basic",
+      "Logo variations (light / dark)",
+      "Typography pairing guide",
+      "Social media templates ×6",
+      "Brand style guide (PDF)",
+      "5 revision rounds",
+      "5-day delivery"
+    ],
+    "revisions": 3,
+    "price": 350,
+    "description": "Professional branding with motion for growing brands"
+  },
+  {
+    "package": "Branding Package",
+    "tier": "Full Ride",
+    "deliverables": [
+
+      "2 Animated logo (seamless loop)",
+      "Full color & typography system",
+      "EPK design (4 pages)",
+      "Brand strategy session (1 hr)",
+      "Unlimited revisions",
+      "3-day express delivery",
+      "2-month post-delivery support"
+    ],
+    "revisions": 5,
+    "price_range": "650–850",
+    "description": "Complete brand identity with motion and strategic direction"
+  },
+
+  {
+    "package": "Apparel Mockups Package",
+    "tier": "Basic",
+    "deliverables": [
+      "1 garment type",
+      "2 colourways",
+      "Front + back views",
+      "High-res PNG delivery",
+      "3-day delivery"
+    ],
+    "revisions": 1,
+    "price": 120,
+    "description": "A clean, premium mockup for one garment — ready for your online store or pre-order campaign."
+  },
+  {
+    "package": "Apparel Mockups Package",
+    "tier": "Moderate",
+    "deliverables": [
+      "2D clothing mockup",
+      "Realistic garment visualization",
+      "3 garment types",
+      "Up to 3 colorways",
+      "AI model showcase (1–2 images)"
+    ],
+    "revisions": 2,
+    "price": 250,
+    "description": "A complete mockup set for your merch drop — multiple garments, colourways, and lifestyle context shots."
+  },
+  {
+    "package": "Apparel Mockups Package",
+    "tier": "Premium",
+    "deliverables": [
+      "2D clothing mockups (front, back, detail views)",
+      "Realistic garment visualization",
+      "Production-ready tech pack (PDF)",
+      "AI models (multiple poses)",
+      "AI lifestyle or studio imagery"
+    ],
+    "revisions": 999,
+    "price_range": "550–750",
+    "description": "Full clothing production support from concept to manufacturing"
+  },
+
+  {
+    "package": "Event Design Package",
+    "tier": "Basic",
+    "deliverables": [
+      "Event invitation (print & digital)",
+      "Flyer or announcement design"
+    ],
+    "revisions": 2,
+    "price": "100–220",
+    "description": "Essential event visuals for a clean and professional presentation"
+  },
+  {
+    "package": "Event Design Package",
+    "tier": "Moderate",
+    "deliverables": [
+      "Event invitation",
+      "Flyer or announcement",
+      "Menu card or program",
+      "Consistent design system"
+    ],
+    "revisions": 3,
+    "price": "160–350",
+    "description": "Complete static design suite with cohesive branding across all assets"
+  },
+  {
+    "package": "Event Design Package",
+    "tier": "Premium",
+    "deliverables": [
+      "Full event stationery suite",
+      "Animated invitation or motion asset",
+      "Social media countdown assets",
+      "Print & digital formats"
+    ],
+    "revisions": 5,
+    "price_range": "250–800",
+    "description": "Premium event experience combining static and motion design for maximum impact"
+  },
+
+  {
+    "package": "Music Visuals Suite",
+    "tier": "Basic",
+    "deliverables": [
+      "1 Premium Cover Art Concept",
+      "Kinetic Typography Lyric Video",
+      "Spotify Canvas (8s Loop)",
+      "3000 × 3000 px Master Files",
+      "5-Day Delivery"
+    ],
+    "revisions": 2,
+    "price": 299,
+    "description": "Essential music visuals for releases"
+  },
+  {
+    "package": "Music Visuals Suite",
+    "tier": "Moderate",
+    "deliverables": [
+      "Everything in Essential",
+      "EP/Album Cover + 3 Single Variations",
+      "Motion Graphic Lyric Video (4K)",
+      "Social Media Kit (Banners & Profile Art)",
+      "5 Social Media Promo Clips",
+      "7-Day Delivery"
+    ],
+    "revisions": 4,
+    "price_range": "599",
+    "description": "A cohesive branding kit for an EP release, including motion graphics and a social media content suite."
+  },
+  {
+    "package": "Music Visuals Suite",
+    "tier": "Premium",
+    "deliverables": [
+      "Everything in Signature",
+      "Cinematic Animated Lyric Video",
+      "DJ/Live VJ Visual Pack (15 Loops)",
+      "Custom Stage Banner Designs",
+      "Priority 5-Day Express Delivery"
+    ],
+    "revisions": 999,
+    "price_range": "900-1249",
+    "description": "The ultimate artist package. Full album rollout visuals plus a professional VJ pack for live performances."
+  }
+]

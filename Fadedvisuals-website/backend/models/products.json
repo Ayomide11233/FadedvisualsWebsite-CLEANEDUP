@@ -1,0 +1,134 @@
+[
+  {
+    "id": "celestial-chaos",
+    "title": "Celestial Chaos",
+    "price": 20,
+    "category": "prints",
+    "image": "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800&q=80",
+    "description": "A dramatic baroque-inspired print featuring swirling celestial figures in rich warm tones.",
+    "sizes": ["S", "M", "L"],
+    "frames": [
+      { "label": "No Frame", "color": null },
+      { "label": "White", "color": "#ffffff" },
+      { "label": "Gold", "color": "#d4af37" },
+      { "label": "Black", "color": "#1a1a1a" },
+      { "label": "Natural", "color": "#8b7355" }
+    ],
+    "details": "Museum-quality giclée print on archival matte paper. Printed with premium pigment inks for longevity and color accuracy.",
+    "shipping": "Ships within 3-5 business days. Carefully packaged in protective tube. Free shipping on orders over $50."
+  },
+  {
+    "id": "ethereal-gaze",
+    "title": "Ethereal Gaze",
+    "price": 20,
+    "category": "prints",
+    "image": "https://images.unsplash.com/photo-1561214115-f2f134cc4912?w=800&q=80",
+    "description": "Abstract portrait with textured layers and piercing blue eyes that captivate.",
+    "sizes": ["S", "M", "L"],
+    "frames": [
+      { "label": "No Frame", "color": null },
+      { "label": "White", "color": "#ffffff" },
+      { "label": "Gold", "color": "#d4af37" },
+      { "label": "Black", "color": "#1a1a1a" },
+      { "label": "Natural", "color": "#8b7355" }
+    ],
+    "details": "Printed on heavyweight fine art paper with a subtle texture. Colors may vary slightly from screen display.",
+    "shipping": "Standard shipping takes 5-7 business days. Express options available at checkout."
+  },
+  {
+    "id": "midnight-bloom",
+    "title": "Midnight Bloom",
+    "price": 20,
+    "category": "prints",
+    "image": "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=800&q=80",
+    "description": "Dark floral composition with vibrant blooms emerging from shadow.",
+    "sizes": ["S", "M", "L"],
+    "frames": [
+      { "label": "No Frame", "color": null },
+      { "label": "White", "color": "#ffffff" },
+      { "label": "Gold", "color": "#d4af37" },
+      { "label": "Black", "color": "#1a1a1a" },
+      { "label": "Natural", "color": "#8b7355" }
+    ],
+    "details": "Fade-resistant archival inks ensure your print stays vibrant for decades.",
+    "shipping": "Ships rolled in protective tube. Framing service available upon request."
+  },
+  {
+    "id": "avian-elegance",
+    "title": "Avian Elegance",
+    "price": 20,
+    "category": "prints",
+    "image": "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800&q=80",
+    "description": "Classic ornithological illustration on vintage paper with delicate detail.",
+    "sizes": ["S", "M", "L"],
+    "frames": [
+      { "label": "No Frame", "color": null },
+      { "label": "White", "color": "#ffffff" },
+      { "label": "Gold", "color": "#d4af37" },
+      { "label": "Black", "color": "#1a1a1a" },
+      { "label": "Natural", "color": "#8b7355" }
+    ],
+    "details": "Reproduced from antique illustration with enhanced color correction.",
+    "shipping": "Free standard shipping on all print orders. Delivered flat or rolled based on size."
+  },
+  {
+    "id": "urban-oracle",
+    "title": "Urban Oracle",
+    "price": 20,
+    "category": "apparel",
+    "image": "https://images.unsplash.com/photo-1509114397022-ed747cca3f65?w=800&q=80",
+    "description": "Surreal street art t-shirt design with bold colors and mystical imagery.",
+    "sizes": ["S", "M", "L", "XL"],
+    "frames": null,
+    "details": "100% organic cotton. Screen-printed with water-based inks. Pre-shrunk and ethically manufactured.",
+    "shipping": "Ships within 2-3 business days. Standard shipping is free for apparel items."
+  },
+  {
+    "id": "botanical-sketch",
+    "title": "Botanical Sketch",
+    "price": 20,
+    "category": "prints",
+    "image": "https://images.unsplash.com/photo-1592224002615-6e25c9a1e3e8?w=800&q=80",
+    "description": "Delicate line drawing of flora on aged paper with handwritten notes.",
+    "sizes": ["S", "M", "L"],
+    "frames": [
+      { "label": "No Frame", "color": null },
+      { "label": "White", "color": "#ffffff" },
+      { "label": "Gold", "color": "#d4af37" },
+      { "label": "Black", "color": "#1a1a1a" },
+      { "label": "Natural", "color": "#8b7355" }
+    ],
+    "details": "Vintage botanical study reproduction. Ideal for gallery wall compositions.",
+    "shipping": "Carefully packaged to prevent damage. Tracking provided on all orders."
+  },
+  {
+    "id": "abstract-wave",
+    "title": "Abstract Wave",
+    "price": 20,
+    "category": "apparel",
+    "image": "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=800&q=80",
+    "description": "Fluid abstract pattern in blue and white on premium tee.",
+    "sizes": ["S", "M", "L", "XL"],
+    "frames": null,
+    "details": "Soft-hand feel with durable print. Machine washable. Unisex fit.",
+    "shipping": "Orders ship same-day if placed before 2pm EST. Free returns within 30 days."
+  },
+  {
+    "id": "gradient-dreams",
+    "title": "Gradient Dreams",
+    "price": 20,
+    "category": "collectibles",
+    "image": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+    "description": "Limited edition holographic print with shifting color spectrum.",
+    "sizes": ["M"],
+    "frames": [
+      { "label": "No Frame", "color": null },
+      { "label": "White", "color": "#ffffff" },
+      { "label": "Gold", "color": "#d4af37" },
+      { "label": "Black", "color": "#1a1a1a" },
+      { "label": "Natural", "color": "#8b7355" }
+    ],
+    "details": "Limited to 50 prints. Each numbered and signed. Includes certificate of authenticity.",
+    "shipping": "Special handling. Ships in rigid mailer with tracking and insurance."
+  }
+]
