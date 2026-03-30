@@ -43,7 +43,7 @@ function App() {
       <Footer />
 
       {/* Floating Chatbot - Always visible, NO login required! */}
-      <Chatbot />
+      {/* <Chatbot /> */}
     </div>
   );
 }
