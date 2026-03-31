@@ -15,7 +15,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from slowapi.middleware import SlowAPIMiddleware
 from starlette.types import Lifespan
-
+from app.limiter import limiter
 from app.config import get_settings
 from app.database import Base, engine
 from app.middleware.audit_log import AuditLogMiddleware
@@ -38,8 +38,7 @@ async def lifespan(app: FastAPI):
     yield
     # shutdown (put cleanup logic here if needed)
 
-# ── Rate limiter (shared instance) ───────────────────────────────────────────
-limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
+
 
 # ── App factory ──────────────────────────────────────────────────────────────
 app = FastAPI(
@@ -109,7 +108,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,   # ← explicit list, never "*"
     allow_credentials=True,
-    allow_methods=["GET", "POST"],             # only what we actually use
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],             # only what we actually use
     allow_headers=["Authorization", "Content-Type"],
 )
 
