@@ -44,7 +44,7 @@ limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
 app = FastAPI(
     title="Faded Visuals API",
     version="2.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
     # Disable docs in production to avoid leaking schema information
     docs_url="/docs" if settings.ENVIRONMENT != "production" else None,
     redoc_url="/redoc" if settings.ENVIRONMENT != "production" else None,
