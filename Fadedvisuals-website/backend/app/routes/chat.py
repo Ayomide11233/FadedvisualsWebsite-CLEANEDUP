@@ -6,9 +6,7 @@ Rate limit: 10 requests/minute per IP (configured in .env).
 """
 
 from fastapi import APIRouter, Depends, Request
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-
+from app.limiter import limiter
 from app.config import get_settings
 from app.repositories.catalog_repository import CatalogRepository
 from app.schemas.chat import ChatRequest, ChatResponse
@@ -16,8 +14,9 @@ from app.services.chat_service import ChatService
 from app.utils.logger import logger
 
 settings = get_settings()
-limiter = Limiter(key_func=get_remote_address)
 router = APIRouter(prefix="/chat", tags=["Chat"])
+
+
 
 
 def _get_service() -> ChatService:

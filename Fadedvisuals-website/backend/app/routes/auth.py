@@ -11,7 +11,7 @@ No business logic lives here.
 
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
-from app.main import limiter
+from app.limiter import limiter
 from app.database import get_db
 from app.repositories.user_repository import UserRepository
 from app.schemas.auth import UserSignupRequest, UserLoginRequest, TokenResponse, UserResponse
@@ -33,6 +33,7 @@ def _get_service(db: Session = Depends(get_db)) -> AuthService:
 )
 @limiter.limit("10/minute")
 def signup(
+    request: Request,
     data: UserSignupRequest,
     service: AuthService = Depends(_get_service),
 ):
@@ -46,6 +47,7 @@ def signup(
 )
 @limiter.limit("10/minute")
 def login(
+    request: Request,
     data: UserLoginRequest,
     service: AuthService = Depends(_get_service),
 ):
@@ -58,5 +60,7 @@ def login(
     summary="Return the authenticated user's profile",
 )
 @limiter.limit("30/minute")
-def profile(current_user=Depends(get_current_user)):
+def profile(
+    request: Request,
+    current_user=Depends(get_current_user)):
     return current_user

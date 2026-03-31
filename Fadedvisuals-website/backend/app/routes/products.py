@@ -5,7 +5,7 @@ Product catalog endpoints — public, paginated, rate-limited.
 """
 
 from fastapi import APIRouter, Depends, Query, Request
-from app.main import limiter
+from app.limiter import limiter
 from app.repositories.catalog_repository import CatalogRepository
 from app.schemas.common import PaginatedResponse, PaginationParams
 from app.services.catalog_service import CatalogService
