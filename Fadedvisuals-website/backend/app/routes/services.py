@@ -5,14 +5,11 @@ Service catalog endpoints — public, paginated, rate-limited.
 """
 
 from fastapi import APIRouter, Depends, Query, Request
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-
+from app.main import limiter
 from app.repositories.catalog_repository import CatalogRepository
 from app.schemas.common import PaginatedResponse, PaginationParams
 from app.services.catalog_service import CatalogService
 
-limiter = Limiter(key_func=get_remote_address)
 router = APIRouter(prefix="/services", tags=["Services"])
 
 

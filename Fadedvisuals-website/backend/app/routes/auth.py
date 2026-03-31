@@ -11,7 +11,7 @@ No business logic lives here.
 
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
-
+from app.main import limiter
 from app.database import get_db
 from app.repositories.user_repository import UserRepository
 from app.schemas.auth import UserSignupRequest, UserLoginRequest, TokenResponse, UserResponse
@@ -31,6 +31,7 @@ def _get_service(db: Session = Depends(get_db)) -> AuthService:
     status_code=201,
     summary="Register a new user account",
 )
+@limiter.limit("10/minute")
 def signup(
     data: UserSignupRequest,
     service: AuthService = Depends(_get_service),
@@ -43,6 +44,7 @@ def signup(
     response_model=TokenResponse,
     summary="Authenticate and receive a JWT",
 )
+@limiter.limit("10/minute")
 def login(
     data: UserLoginRequest,
     service: AuthService = Depends(_get_service),
@@ -55,5 +57,6 @@ def login(
     response_model=UserResponse,
     summary="Return the authenticated user's profile",
 )
+@limiter.limit("30/minute")
 def profile(current_user=Depends(get_current_user)):
     return current_user
