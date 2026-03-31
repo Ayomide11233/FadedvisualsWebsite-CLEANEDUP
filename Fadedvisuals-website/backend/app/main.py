@@ -63,7 +63,10 @@ async def global_exception_handler(request: Request, exc: Exception):
     Catch-all exception handler.
     Never expose stack traces to clients — log internally only.
     """
-    logger.error("Unhandled exception on %s %s: %s", request.method, request.url.path, exc)
+    logger.exception("Unhandled exception", extra={
+        "method": request.method,
+        "path": request.url.path,
+    })
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"detail": "An unexpected error occurred.", "code": "internal_error"},
