@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
+from starlette.types import Lifespan
 
 from app.config import get_settings
 from app.database import Base, engine
@@ -19,12 +20,20 @@ from app.middleware.request_size import RequestSizeLimitMiddleware
 from app.middleware.security_headers import SecurityHeadersMiddleware
 from app.routes import auth, chat, products, services
 from app.routes.stripe_checkout import router as stripe_router
+from contextlib import asynccontextmanager
 from app.utils.logger import logger
 
 settings = get_settings()
 
 # ── Database ─────────────────────────────────────────────────────────────────
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # startup
+    if settings.ENVIRONMENT == "development":
+        Base.metadata.create_all(bind=engine)
+    yield
+    # shutdown (put cleanup logic here if needed)
 
 # ── Rate limiter (shared instance) ───────────────────────────────────────────
 limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
@@ -33,6 +42,7 @@ limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
 app = FastAPI(
     title="Faded Visuals API",
     version="2.0.0",
+    lifespan=lifespan
     # Disable docs in production to avoid leaking schema information
     docs_url="/docs" if settings.ENVIRONMENT != "production" else None,
     redoc_url="/redoc" if settings.ENVIRONMENT != "production" else None,
