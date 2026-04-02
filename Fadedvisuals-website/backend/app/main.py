@@ -99,7 +99,8 @@ app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(AuditLogMiddleware)
 
 # 3. Request body size limit (64 KB)
-app.add_middleware(RequestSizeLimitMiddleware)
+app.add_middleware(RequestSizeLimitMiddleware,
+                    max_bytes=settings.MAX_REQUEST_BODY_SIZE)
 
 # 4. CORS — restricted to explicit allow-list
 #    VULNERABILITY FIX: was allow_origins=["*"] which allows any site to make

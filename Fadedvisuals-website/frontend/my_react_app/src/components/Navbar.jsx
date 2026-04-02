@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getCartItemCount } from '../utils/cartUtils';
 
 const Navbar = ({ activePage = 'home' }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  // Add a state to track if the user is logged in
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -13,14 +15,17 @@ const Navbar = ({ activePage = 'home' }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Update cart count on mount and when storage changes
   useEffect(() => {
     const updateCount = () => setCartCount(getCartItemCount());
+    // Also update auth state in case it changed in another tab
+    const updateAuth = () => setIsLoggedIn(!!localStorage.getItem('token'));
+
     updateCount();
     
-    // Listen for storage changes (when cart is updated from other tabs/windows)
-    window.addEventListener('storage', updateCount);
-    // Listen for custom cart update events
+    window.addEventListener('storage', () => {
+      updateCount();
+      updateAuth();
+    });
     window.addEventListener('cartUpdated', updateCount);
     
     return () => {
@@ -29,6 +34,13 @@ const Navbar = ({ activePage = 'home' }) => {
     };
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
+    window.location.href = '/'; // Redirect to home on logout
+  };
+
+  // Define base items
   const navItems = [
     { label: 'Home', href: '/' },
     { label: 'About', href: '/about' },
@@ -36,6 +48,11 @@ const Navbar = ({ activePage = 'home' }) => {
     { label: 'Shop', href: '/shop' },
     { label: 'Cart', href: '/cart' },
   ];
+
+  // Dynamically add Login OR Logout
+  const finalNavItems = isLoggedIn 
+    ? [...navItems, { label: 'Logout', onClick: handleLogout }] 
+    : [...navItems, { label: 'Login', href: '/Authpage' }];
 
   return (
     <motion.nav
@@ -63,70 +80,59 @@ const Navbar = ({ activePage = 'home' }) => {
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-8">
-          {navItems.map((item, index) => {
+          {finalNavItems.map((item, index) => {
             const isActive = activePage === item.label.toLowerCase();
-            return (
-              <motion.a
+            
+            // Check if it's the Logout button or a standard link
+            const isButton = !!item.onClick;
+
+            const content = (
+              <motion.div
                 key={item.label}
-                href={item.href}
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className={`relative text-sm tracking-wide transition-colors duration-300 group pb-1 ${
-                  isActive ? 'text-white' : 'text-gray-400 hover:text-white'
-                }`}
-                style={{ fontFamily: "'Inter', sans-serif" }}
+                className="relative"
               >
-                {item.label}
-                
-                {/* Cart badge */}
-                {item.label === 'Cart' && cartCount > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-2 -right-3 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
-                    style={{
-                      background: 'linear-gradient(135deg, #9333ea, #7c3aed)',
-                      boxShadow: '0 2px 8px rgba(147,51,234,0.4)',
-                      fontFamily: "'Inter', sans-serif",
-                    }}
+                {isButton ? (
+                  <button
+                    onClick={item.onClick}
+                    className="text-sm tracking-wide text-gray-400 hover:text-red-400 transition-colors duration-300"
+                    style={{ fontFamily: "'Inter', sans-serif" }}
                   >
-                    {cartCount > 9 ? '9+' : cartCount}
-                  </motion.span>
+                    {item.label}
+                  </button>
+                ) : (
+                  <a
+                    href={item.href}
+                    className={`relative text-sm tracking-wide transition-colors duration-300 group pb-1 ${
+                      isActive ? 'text-white' : 'text-gray-400 hover:text-white'
+                    }`}
+                    style={{ fontFamily: "'Inter', sans-serif" }}
+                  >
+                    {item.label}
+                    {item.label === 'Cart' && cartCount > 0 && (
+                      <span className="absolute -top-2 -right-3 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-purple-600 text-white shadow-lg">
+                        {cartCount > 9 ? '9+' : cartCount}
+                      </span>
+                    )}
+                    <span className={`absolute -bottom-1 left-0 h-[2px] bg-purple-500 transition-all duration-300 ${isActive ? 'w-full' : 'w-0 group-hover:w-full'}`} />
+                  </a>
                 )}
-                
-                {/* Animated underline */}
-                <span
-                  className={`absolute -bottom-1 left-0 h-[2px] bg-gradient-to-r from-purple-500 to-purple-700 transition-all duration-300 rounded-full ${
-                    isActive ? 'w-full' : 'w-0 group-hover:w-full'
-                  }`}
-                />
-                {/* Active glow dot */}
-                {isActive && (
-                  <motion.span
-                    layoutId="navDot"
-                    className="absolute -bottom-[14px] left-1/2 -translate-x-1/2 w-[5px] h-[5px] rounded-full bg-purple-500"
-                    style={{ boxShadow: '0 0 8px 3px rgba(168,85,247,0.6)' }}
-                  />
-                )}
-              </motion.a>
+              </motion.div>
             );
+
+            return content;
           })}
 
+          {/* Let's Talk Button */}
           <motion.a
             href="/contact"
-            whileHover={{
-              scale: 1.05,
-              y: -2,
-              boxShadow: '0 8px 24px rgba(168, 85, 247, 0.45)',
-            }}
-            whileTap={{ scale: 0.96 }}
-            transition={{ duration: 0.2, ease: 'easeInOut' }}
-            className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-purple-800 rounded-full text-sm font-medium tracking-wide relative overflow-hidden group"
+            whileHover={{ scale: 1.05, y: -2 }}
+            className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-purple-800 rounded-full text-sm font-medium"
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
-            <span className="relative z-10">Let's Talk</span>
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            Let's Talk
           </motion.a>
         </div>
 

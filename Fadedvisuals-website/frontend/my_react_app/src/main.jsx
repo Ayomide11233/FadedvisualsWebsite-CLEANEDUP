@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 // Import components normally
 import App from './App.jsx';
+import AuthPage from './Authpage.jsx';
 import AboutPage from './AboutPage.jsx';
 import ServicePage from './ServicePage.jsx';
 import ShopPage from './ShopPage.jsx';
@@ -26,6 +27,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/Authpage" element={<AuthPage />} />
         <Route path="/success" element={<SuccessPage />} />
 
         {/* Dynamic Route for Products */}
@@ -37,6 +39,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/shop.html" element={<ShopPage />} />
         <Route path="/cart.html" element={<CartPage />} />
         <Route path="/contact.html" element={<ContactPage />} />
+        <Route path="/Authpage.html" element={<AuthPage />} />
         <Route path="/success.html" element={<SuccessPage />} />
 
         {/* Fallback/404 - Renders App if no route matches */}
