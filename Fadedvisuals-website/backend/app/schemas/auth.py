@@ -60,6 +60,7 @@ class UserResponse(BaseModel):
     id: int
     username: str
     email: str
+    is_admin: bool = False          # exposed so frontend knows admin status
 
 
 class TokenResponse(BaseModel):

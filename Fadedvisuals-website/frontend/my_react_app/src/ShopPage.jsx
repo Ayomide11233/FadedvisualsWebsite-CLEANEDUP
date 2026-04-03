@@ -1,11 +1,14 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollProgress from './components/ScrollProgress';
 import CategoryFilter from './components/CategoryFilter';
 import ProductCard from './components/ProductCard';
+import AdminProductModal from './components/AdminProductModal';
 import { PRODUCTS, CATEGORIES } from './data/products';
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 /* ═══════════════════════════════════════════════════════════
    SHOP HERO
@@ -75,6 +78,49 @@ const ShopHero = () => (
 ═══════════════════════════════════════════════════════════ */
 const ShopPage = () => {
   const [activeCategory, setActiveCategory] = useState('all');
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState('');
+
+    // Admin state
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [editingProduct, setEditingProduct] = useState(null); // null = add mode
+  
+    // ── Check if logged-in user is admin ───────────────────────────────────────
+    useEffect(() => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        // JWT payload is base64 — we can't verify it client-side but we can read it
+        // The real gate is on the server. This just controls UI visibility.
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        // is_admin is not in the JWT payload by default — we check the stored user instead
+        const storedUser = localStorage.getItem('fv_user');
+        if (storedUser) {
+          const user = JSON.parse(storedUser);
+          setIsAdmin(Boolean(user?.is_admin));
+        }
+      } catch (_) {}
+    }, []);
+  
+    // ── Fetch products from API ────────────────────────────────────────────────
+    const fetchProducts = async () => {
+      setLoading(true);
+      setFetchError('');
+      try {
+        const res = await fetch(`${API_BASE}/products/`);
+        if (!res.ok) throw new Error('Failed to load products');
+        const data = await res.json();
+        setProducts(data);
+      } catch (err) {
+        setFetchError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    useEffect(() => { fetchProducts(); }, []);
 
   // Filter products by category
   const filteredProducts = useMemo(() => {
@@ -84,7 +130,25 @@ const ShopPage = () => {
 
   // Navigate to product detail
   const handleProductClick = (product) => {
-    window.location.href = `/shop/${product.id}`;
+    window.location.href = `/shop/${product.slug || product.id}`;
+  };
+
+  const handleEdit = (product) => {
+    setEditingProduct(product);
+    setModalOpen(true);
+  };
+
+  const handleAddNew = () => {
+    setEditingProduct(null);
+    setModalOpen(true);
+  };
+
+  const handleSaved = (savedProduct) => {
+    setProducts(prev => {
+      const exists = prev.find(p => p.id === savedProduct.id);
+      if (exists) return prev.map(p => p.id === savedProduct.id ? savedProduct : p);
+      return [savedProduct, ...prev];
+    });
   };
 
   return (
@@ -102,6 +166,32 @@ const ShopPage = () => {
 
       <ScrollProgress />
       <Navbar activePage="shop" />
+
+      {/* Admin "Add Product" floating button */}
+      {isAdmin && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleAddNew}
+          style={{
+            position: 'fixed', top: '88px', right: '24px', zIndex: 60,
+            background: 'linear-gradient(135deg, #c084fc 0%, #7c3aed 100%)',
+            border: 'none', borderRadius: '12px',
+            padding: '10px 18px', color: '#fff', cursor: 'pointer',
+            fontFamily: "'Unbounded', sans-serif", fontSize: '0.6rem',
+            letterSpacing: '0.08em', display: 'flex', alignItems: 'center', gap: '8px',
+            boxShadow: '0 4px 24px rgba(124,58,237,0.4)',
+          }}
+        >
+          <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          ADD PRODUCT
+        </motion.button>
+      )}
+
 
       <main>
         <ShopHero />
@@ -128,34 +218,48 @@ const ShopPage = () => {
               onCategoryChange={setActiveCategory}
             />
 
-            {/* Product grid with fade transition */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeCategory}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-              >
-                {filteredProducts.map((product, index) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    index={index}
-                    onClick={handleProductClick}
-                  />
-                ))}
-              </motion.div>
-            </AnimatePresence>
+                        {/* Loading state */}
+                        {loading && (
+              <div style={{ textAlign: 'center', padding: '60px 0', color: '#6b7280', fontFamily: "'Inter', sans-serif", fontSize: '0.85rem' }}>
+                Loading products…
+              </div>
+            )}
+
+            {/* Fetch error */}
+            {fetchError && !loading && (
+              <div style={{ textAlign: 'center', padding: '60px 0', color: '#f87171', fontFamily: "'Inter', sans-serif", fontSize: '0.85rem' }}>
+                {fetchError} — <button onClick={fetchProducts} style={{ background: 'none', border: 'none', color: '#c084fc', cursor: 'pointer', fontFamily: 'inherit' }}>Retry</button>
+              </div>
+            )}
+
+            {/* Product grid */}
+            {!loading && !fetchError && (
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeCategory}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                >
+                  {filteredProducts.map((product, index) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      index={index}
+                      onClick={handleProductClick}
+                      isAdmin={isAdmin}
+                      onEdit={handleEdit}
+                    />
+                  ))}
+                </motion.div>
+              </AnimatePresence>
+            )}
 
             {/* Empty state */}
-            {filteredProducts.length === 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-center py-20"
-              >
+            {!loading && !fetchError && filteredProducts.length === 0 && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-20">
                 <p className="text-gray-500 text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
                   No products found in this category.
                 </p>
@@ -166,6 +270,14 @@ const ShopPage = () => {
       </main>
 
       <Footer />
+
+            {/* Admin modal */}
+            <AdminProductModal
+        isOpen={modalOpen}
+        onClose={() => { setModalOpen(false); setEditingProduct(null); }}
+        product={editingProduct}
+        onSaved={handleSaved}
+      />
       
     </div>
   );

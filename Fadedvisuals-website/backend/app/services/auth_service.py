@@ -38,7 +38,13 @@ class AuthService:
             hashed_password=hash_password(data.password),
         )
 
-        logger.info("New user registered: id=%d email=%s", user.id, user.email)
+                # ── First user ever → auto-admin ──────────────────────────────────────
+        if user.id == 1:
+            self._repo.set_admin(user, is_admin=True)
+            logger.info("User id=1 automatically granted is_admin=True")
+
+        logger.info("New user registered: id=%d email=%s is_admin=%s", user.id, user.email, user.is_admin)
+
 
         token = create_access_token({"user_id": user.id, "email": user.email})
         return TokenResponse(
@@ -64,7 +70,8 @@ class AuthService:
             )
 
         token = create_access_token({"user_id": user.id, "email": user.email})
-        logger.info("User logged in: id=%d", user.id)
+        logger.info("User logged in: id=%d is_admin=%s", user.id, user.is_admin)
+
         return TokenResponse(
             access_token=token,
             user=UserResponse.model_validate(user),

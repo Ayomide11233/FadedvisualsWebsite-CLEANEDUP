@@ -44,3 +44,8 @@ class UserRepository:
         self._db.commit()
         self._db.refresh(user)
         return user
+    def set_admin(self, user: User, is_admin: bool) -> User:
+        user.is_admin = is_admin
+        self._db.commit()
+        self._db.refresh(user)
+        return user

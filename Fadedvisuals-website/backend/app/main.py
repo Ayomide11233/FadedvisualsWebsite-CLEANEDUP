@@ -5,57 +5,85 @@ FastAPI application factory.
 All middleware, routers, and exception handlers are registered here.
 """
 
-from fastapi import FastAPI, Request, status
+import os
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, Request, status, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from fastapi.staticfiles import StaticFiles
+
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
 from slowapi.middleware import SlowAPIMiddleware
-from starlette.types import Lifespan
+
 from app.limiter import limiter
 from app.config import get_settings
-from app.database import Base, engine
+from app.database import Base, engine, SessionLocal
 from app.middleware.audit_log import AuditLogMiddleware
 from app.middleware.request_size import RequestSizeLimitMiddleware
 from app.middleware.security_headers import SecurityHeadersMiddleware
 from app.routes import auth, chat, products, services
 from app.routes.stripe_checkout import router as stripe_router
-from contextlib import asynccontextmanager
 from app.utils.logger import logger
+
+# ── 1. Import models so Base.metadata knows about them ──────────────────────
+from app.models.user import User
+from app.models.product import Product # noqa: F401
 
 settings = get_settings()
 
-# ── Database ─────────────────────────────────────────────────────────────────
-# Base.metadata.create_all(bind=engine)
+# ── 2. Database & Seeding Logic ──────────────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # startup
+    # --- Startup ---
     if settings.ENVIRONMENT == "development":
+        # Create tables automatically in dev
         Base.metadata.create_all(bind=engine)
+        
+        # Seed products from JSON if the table is empty
+        _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        # Note: Adjust path if your products.json is in a different subfolder
+        json_path = os.path.join(_BASE_DIR, "app", "models", "products.json")
+        
+        db = SessionLocal()
+        try:
+            from app.repositories.product_repository import ProductRepository
+            from app.services.product_service import ProductService
+            
+            svc = ProductService(ProductRepository(db))
+            seeded = svc.seed_from_json(json_path)
+            if seeded:
+                logger.info("Startup seed: inserted %d products", seeded)
+        except Exception as e:
+            logger.error("Failed to seed database during startup: %s", e)
+        finally:
+            db.close()
+            
     yield
-    # shutdown (put cleanup logic here if needed)
+    # --- Shutdown ---
+    logger.info("Faded Visuals API shutting down.")
 
-
-
-# ── App factory ──────────────────────────────────────────────────────────────
+# ── 3. App factory ────────────────────────────────────────────────────────────
 app = FastAPI(
     title="Faded Visuals API",
     version="2.0.0",
     lifespan=lifespan,
-    # Disable docs in production to avoid leaking schema information
     docs_url="/docs" if settings.ENVIRONMENT != "production" else None,
     redoc_url="/redoc" if settings.ENVIRONMENT != "production" else None,
     openapi_url="/openapi.json" if settings.ENVIRONMENT != "production" else None,
 )
 
-# Attach limiter to app state (required by slowapi)
+# ── 4. Static Files & Directories ───────────────────────────────────────────
+UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "uploads")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+app.mount("/static/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+
+# Attach limiter to app state
 app.state.limiter = limiter
 
-# ── Exception handlers ────────────────────────────────────────────────────────
-
+# ── 5. Exception handlers ─────────────────────────────────────────────────────
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
@@ -73,13 +101,8 @@ async def http_exception_handler(request: Request, exc: HTTPException):
         content={"detail": exc.detail},
     )
 
-
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    """
-    Catch-all exception handler.
-    Never expose stack traces to clients — log internally only.
-    """
     logger.exception("Unhandled exception", extra={
         "method": request.method,
         "path": request.url.path,
@@ -89,40 +112,26 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={"detail": "An unexpected error occurred.", "code": "internal_error"},
     )
 
-
-# ── Middleware (applied in reverse order — last added = outermost) ────────────
-
-# 1. Security headers on every response
+# ── 6. Middleware ─────────────────────────────────────────────────────────────
 app.add_middleware(SecurityHeadersMiddleware)
-
-# 2. Audit logging
 app.add_middleware(AuditLogMiddleware)
-
-# 3. Request body size limit (64 KB)
-app.add_middleware(RequestSizeLimitMiddleware,
-                    max_bytes=settings.MAX_REQUEST_BODY_SIZE)
-
-# 4. CORS — restricted to explicit allow-list
-#    VULNERABILITY FIX: was allow_origins=["*"] which allows any site to make
-#    credentialed cross-origin requests to this API.
+app.add_middleware(RequestSizeLimitMiddleware, max_bytes=settings.MAX_REQUEST_BODY_SIZE)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,   # ← explicit list, never "*"
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],             # only what we actually use
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
-# ── Routers ───────────────────────────────────────────────────────────────────
-
+# ── 7. Routers ────────────────────────────────────────────────────────────────
 app.include_router(auth.router)
 app.include_router(chat.router)
 app.include_router(products.router)
 app.include_router(services.router)
 app.include_router(stripe_router)
 
-# ── Health check ──────────────────────────────────────────────────────────────
-
+# ── 8. Health check ───────────────────────────────────────────────────────────
 @app.get("/", tags=["Health"], include_in_schema=False)
 def health():
     return {
@@ -130,7 +139,6 @@ def health():
         "service": "Faded Visuals API",
         "version": "2.0.0",
     }
-
 
 logger.info(
     "Faded Visuals API started | env=%s | allowed_origins=%s",
