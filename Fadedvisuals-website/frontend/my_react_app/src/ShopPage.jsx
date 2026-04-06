@@ -83,26 +83,34 @@ const ShopPage = () => {
   const [fetchError, setFetchError] = useState('');
 
     // Admin state
-    const [isAdmin, setIsAdmin] = useState(false);
-    const [modalOpen, setModalOpen] = useState(false);
-    const [editingProduct, setEditingProduct] = useState(null); // null = add mode
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+
+  // ── 1. FIXED: Improved Admin Check ───────────────────────────────────────
+  useEffect(() => {
+    console.log("Checking Admin Status..."); // Should see this first
+    try {
+      const token = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user') || localStorage.getItem('fv_user');
   
-    // ── Check if logged-in user is admin ───────────────────────────────────────
-    useEffect(() => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-        // JWT payload is base64 — we can't verify it client-side but we can read it
-        // The real gate is on the server. This just controls UI visibility.
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        // is_admin is not in the JWT payload by default — we check the stored user instead
-        const storedUser = localStorage.getItem('fv_user');
-        if (storedUser) {
-          const user = JSON.parse(storedUser);
-          setIsAdmin(Boolean(user?.is_admin));
-        }
-      } catch (_) {}
-    }, []);
+      console.log("Token found:", !!token);
+      console.log("User found:", !!storedUser);
+  
+      if (!token || !storedUser) {
+        console.warn("Auth data missing from LocalStorage");
+        return;
+      }
+  
+      const user = JSON.parse(storedUser);
+      const adminStatus = user.is_admin === true || user.is_admin === 1 || user.is_admin === "1";
+      
+      setIsAdmin(adminStatus);
+      console.log("Final Admin Calculation:", adminStatus);
+    } catch (err) {
+      console.error("Critical error in Admin check:", err);
+    }
+  }, []);
   
     // ── Fetch products from API ────────────────────────────────────────────────
     const fetchProducts = async () => {
@@ -126,7 +134,7 @@ const ShopPage = () => {
   const filteredProducts = useMemo(() => {
     if (activeCategory === 'all') return PRODUCTS;
     return PRODUCTS.filter((p) => p.category === activeCategory);
-  }, [activeCategory]);
+  }, [activeCategory, PRODUCTS]);
 
   // Navigate to product detail
   const handleProductClick = (product) => {
@@ -149,6 +157,7 @@ const ShopPage = () => {
       if (exists) return prev.map(p => p.id === savedProduct.id ? savedProduct : p);
       return [savedProduct, ...prev];
     });
+    setModalOpen(false);
   };
 
   return (

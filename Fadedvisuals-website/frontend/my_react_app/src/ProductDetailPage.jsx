@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollProgress from './components/ScrollProgress';
 import Accordion from './components/Accordion';
+import AdminProductModal from './components/AdminProductModal'; // 1. 
 import { SizeSelector, QuantitySelector, FrameSelector } from './components/ProductOptions';
 import { PRODUCTS } from './data/products';
 import { calculatePrice, formatPrice } from './utils/pricing';
@@ -16,9 +17,20 @@ const ProductDetailPage = () => {
   const [selectedFrame, setSelectedFrame] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
+   // --- ADMIN STATE ---
+   const [isAdmin, setIsAdmin] = useState(false);
+   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Get product ID from URL path
   useEffect(() => {
+    // Check for admin status on load
+    const storedUser = localStorage.getItem('user') || localStorage.getItem('fv_user');
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      setIsAdmin(user.is_admin === true || user.is_admin === 1 || user.is_admin === "1");
+    }
+  
+      // Existing product loading logic
     const pathParts = window.location.pathname.split('/');
     const productId = pathParts[pathParts.length - 1];
     const foundProduct = PRODUCTS.find((p) => p.id === productId);
@@ -31,6 +43,14 @@ const ProductDetailPage = () => {
       }
     }
   }, []);
+
+   // --- Handlers ---
+   const handleProductUpdate = (updatedProduct) => {
+    setProduct(updatedProduct);
+    setIsModalOpen(false);
+  };
+
+  
 
   const [buyNowLoading, setBuyNowLoading] = useState(false);
 
@@ -328,6 +348,15 @@ const ProductDetailPage = () => {
       </main>
 
       <Footer />
+       {/* --- MODAL RENDER --- */}
+       {isAdmin && (
+        <AdminProductModal 
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          product={product}
+          onSaved={handleProductUpdate}
+        />
+      )}
     </div>
   );
 };

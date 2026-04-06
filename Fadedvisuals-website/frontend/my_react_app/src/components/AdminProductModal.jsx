@@ -126,62 +126,83 @@ const AdminProductModal = ({ isOpen, onClose, product, onSaved }) => {
 
   const handleSubmit = async () => {
     const errs = validate();
-    if (Object.keys(errs).length) { setErrors(errs); return; }
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      return;
+    }
     setErrors({});
     setApiError('');
     setLoading(true);
-
+  
     const token = localStorage.getItem('token');
-    // NOTE: Use /api prefix to match your main.py routers
-    const baseUrl = `${API_BASE}/api/products`; 
-    const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
-
+    
+    // 1. Base URL - Based on your main.py routers
+    const baseUrl = `${API_BASE}/products`; 
+  
+    // 2. THE FIX: Get the numeric ID for the URL path
+    // Using product.id (the integer) instead of product.slug (the string)
+    const productId = product?.id || product?._id;
+  
+    // If editing, we MUST have a numeric ID or the backend returns 422
+    const url = isEdit ? `${baseUrl}/${productId}` : `${baseUrl}/`;
+    const method = isEdit ? 'PUT' : 'POST';
+  
     try {
-      let saved;
-
+      // 3. Prepare the Clean Payload
       const payload = {
-        title: form.title,
-        slug: form.slug,
+        title: form.title.trim(),
+        // Remove special characters like ./ from the slug before sending
+        slug: form.slug.toLowerCase().replace(/[^a-z0-9-]/g, ''),
         price: Number(form.price),
         category: form.category,
         description: form.description,
         details: form.details,
         shipping: form.shipping,
         sizes: form.sizes,
-        frames: form.hasFrames ? DEFAULT_FRAMES : null,
+        // Default to empty list if no frames; FastAPI models prefer [] over null
+        frames: form.hasFrames ? DEFAULT_FRAMES : [],
         in_stock: form.in_stock,
       };
-
-      const url = isEdit ? `${baseUrl}/${product.id}` : `${baseUrl}/`;
-      const method = isEdit ? 'PUT' : 'POST';
-
+  
       const res = await fetch(url, {
-        method, 
-        headers, 
+        method,
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Authorization': `Bearer ${token}` 
+        },
         body: JSON.stringify(payload),
       });
-
+  
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || 'Operation failed');
-      saved = data;
-
-      // Upload image if a file was selected
-      if (imageFile && saved.id) {
+  
+      if (!res.ok) {
+        // Pulls the specific error message from FastAPI's validation detail
+        const errorMsg = data.detail?.[0]?.msg || data.detail || 'Operation failed';
+        throw new Error(errorMsg);
+      }
+  
+      let savedProduct = data;
+  
+      // 4. Handle Image Upload (only if a new file was selected)
+      if (imageFile && savedProduct.id) {
         const fd = new FormData();
         fd.append('file', imageFile);
-        const imgRes = await fetch(`${baseUrl}/${saved.id}/image`, {
+        
+        const imgRes = await fetch(`${baseUrl}/${savedProduct.id}/image`, {
           method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { 'Authorization': `Bearer ${token}` },
           body: fd,
         });
+        
         const imgData = await imgRes.json();
         if (!imgRes.ok) throw new Error(imgData.detail || 'Image upload failed');
-        saved = imgData;
+        savedProduct = imgData;
       }
-
-      onSaved(saved);
+  
+      onSaved(savedProduct);
       onClose();
     } catch (err) {
+      console.error("Submission Error:", err);
       setApiError(err.message);
     } finally {
       setLoading(false);
@@ -202,18 +223,26 @@ const AdminProductModal = ({ isOpen, onClose, product, onSaved }) => {
           />
 
           <motion.div
-            initial={{ opacity: 0, y: 32, scale: 0.97 }}
+            initial={{ opacity: 0, y: -40, scale: 0.97 }} // Starts a bit higher up
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 16, scale: 0.97 }}
+            exit={{ opacity: 0, y: -40, scale: 0.97 }}
             style={{
-              position: 'fixed', top: '50%', left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '95%', maxWidth: '560px',
-              maxHeight: '90vh', overflowY: 'auto',
+              position: 'fixed',
+              top: '40px',             // <--- Anchors it 40px from the top
+              left: '50%',
+              transform: 'translateX(-50%)', // <--- Only centers horizontally now
+              width: '95%',
+              maxWidth: '560px',
+              maxHeight: 'calc(100vh - 80px)', // <--- Prevents it from going off-screen
+              overflowY: 'auto',
               background: '#121212',
               border: '1px solid rgba(192,132,252,0.2)',
-              borderRadius: '20px', padding: '32px',
-              zIndex: 101, boxSizing: 'border-box',
+              borderRadius: '20px',
+              padding: '32px',
+              zIndex: 101,
+              boxSizing: 'border-box',
+              // Optional: Add a nice shadow to make it pop from the background
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
             }}
           >
             {/* Header */}

@@ -189,7 +189,11 @@ const LoginForm = ({ onSuccess, onSwitch }) => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || 'Login failed.');
+      // --- UPDATED LOGIC ---
       localStorage.setItem('token', data.access_token);
+      // This saves the user object so the Admin check can find it
+      localStorage.setItem('user', JSON.stringify(data.user)); 
+      // ---------------------
       onSuccess(data);
     } catch (err) {
       setApiError(err.message);
@@ -262,6 +266,7 @@ const SignupForm = ({ onSuccess, onSwitch }) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || 'Signup failed.');
       localStorage.setItem('token', data.access_token);
+      localStorage.setItem('user', JSON.stringify(data.user));
       onSuccess(data);
     } catch (err) {
       setApiError(err.message);
