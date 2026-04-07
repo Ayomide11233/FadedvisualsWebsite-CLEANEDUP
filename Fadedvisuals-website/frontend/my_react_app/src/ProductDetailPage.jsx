@@ -6,16 +6,18 @@ import ScrollProgress from './components/ScrollProgress';
 import Accordion from './components/Accordion';
 import AdminProductModal from './components/AdminProductModal'; // 1. 
 import { SizeSelector, QuantitySelector, FrameSelector } from './components/ProductOptions';
-import { PRODUCTS } from './data/products';
+import { useParams } from 'react-router-dom';
 import { calculatePrice, formatPrice } from './utils/pricing';
 import { redirectToCheckout } from './services/stripeService';
 import { addToCart } from './utils/cartUtils';
 
 const ProductDetailPage = () => {
+  const { slug } = useParams();
   const [product, setProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedFrame, setSelectedFrame] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(true);
   const [addedToCart, setAddedToCart] = useState(false);
    // --- ADMIN STATE ---
    const [isAdmin, setIsAdmin] = useState(false);
@@ -23,27 +25,50 @@ const ProductDetailPage = () => {
 
   // Get product ID from URL path
   useEffect(() => {
-    // Check for admin status on load
+    // --- Admin Check ---
     const storedUser = localStorage.getItem('user') || localStorage.getItem('fv_user');
     if (storedUser) {
       const user = JSON.parse(storedUser);
       setIsAdmin(user.is_admin === true || user.is_admin === 1 || user.is_admin === "1");
     }
   
-      // Existing product loading logic
-    const pathParts = window.location.pathname.split('/');
-    const productId = pathParts[pathParts.length - 1];
-    const foundProduct = PRODUCTS.find((p) => p.id === productId);
-
-    if (foundProduct) {
-      setProduct(foundProduct);
-      setSelectedSize(foundProduct.sizes[0]);
-      if (foundProduct.frames) {
-        setSelectedFrame(foundProduct.frames[0].label);
+    // --- FETCH PRODUCT FROM DATABASE ---
+    const fetchProduct = async () => {
+      setLoading(true);
+      try {
+        // We grab the slug/id from the URL (pathParts logic)
+        const pathParts = window.location.pathname.split('/');
+        const identifier = pathParts[pathParts.length - 1];
+  
+        // Call your API (adjust the URL if your API uses /products/id)
+        const res = await fetch(`${'http://localhost:8000'}/products/${identifier}`);
+        
+        if (!res.ok) throw new Error('Product not found');
+        
+        const data = await res.json();
+  
+        // Handle SQLite JSON strings if necessary
+        const parsedProduct = {
+          ...data,
+          sizes: typeof data.sizes_json === 'string' ? JSON.parse(data.sizes_json) : (data.sizes || []),
+          frames: typeof data.frames_json === 'string' ? JSON.parse(data.frames_json) : (data.frames || null)
+        };
+  
+        setProduct(parsedProduct);
+        
+        // Initialize selectors
+        if (parsedProduct.sizes?.length > 0) setSelectedSize(parsedProduct.sizes[0]);
+        if (parsedProduct.frames?.length > 0) setSelectedFrame(parsedProduct.frames[0].label);
+        
+      } catch (err) {
+        console.error("Error loading product:", err);
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+  
+    fetchProduct();
   }, []);
-
    // --- Handlers ---
    const handleProductUpdate = (updatedProduct) => {
     setProduct(updatedProduct);
@@ -83,6 +108,15 @@ const ProductDetailPage = () => {
     if (!product) return null;
     return calculatePrice(product.price, selectedSize, selectedFrame, quantity);
   }, [product, selectedSize, selectedFrame, quantity]);
+
+  {isAdmin && (
+    <button 
+      onClick={() => setIsModalOpen(true)}
+      className="mb-4 px-4 py-2 bg-purple-600 rounded-lg text-xs font-bold"
+    >
+      EDIT PRODUCT DATA
+    </button>
+  )}
 
   // Handle back navigation
   const handleBack = () => {
@@ -170,7 +204,7 @@ const ProductDetailPage = () => {
               {/* Image container */}
               <div className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-purple-500/20">
                 <img
-                  src={product.image}
+                  src={product.image_url || product.image}
                   alt={product.title}
                   className="w-full h-full object-cover"
                 />

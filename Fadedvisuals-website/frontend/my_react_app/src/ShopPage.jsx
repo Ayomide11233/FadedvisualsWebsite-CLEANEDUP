@@ -6,7 +6,7 @@ import ScrollProgress from './components/ScrollProgress';
 import CategoryFilter from './components/CategoryFilter';
 import ProductCard from './components/ProductCard';
 import AdminProductModal from './components/AdminProductModal';
-import { PRODUCTS, CATEGORIES } from './data/products';
+import { CATEGORIES } from './data/products';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -117,9 +117,12 @@ const ShopPage = () => {
       setLoading(true);
       setFetchError('');
       try {
-        const res = await fetch(`${API_BASE}/products/`);
+        // Note: Use /products without the extra slash if your FastAPI router is strict
+        const res = await fetch(`${API_BASE}/products`); 
         if (!res.ok) throw new Error('Failed to load products');
         const data = await res.json();
+        
+        // Update our state with the REAL database products
         setProducts(data);
       } catch (err) {
         setFetchError(err.message);
@@ -132,13 +135,14 @@ const ShopPage = () => {
 
   // Filter products by category
   const filteredProducts = useMemo(() => {
-    if (activeCategory === 'all') return PRODUCTS;
-    return PRODUCTS.filter((p) => p.category === activeCategory);
-  }, [activeCategory, PRODUCTS]);
+    if (activeCategory === 'all') return products;
+    return products.filter((p) => p.category === activeCategory);
+  }, [activeCategory, products]);
 
   // Navigate to product detail
   const handleProductClick = (product) => {
-    window.location.href = `/shop/${product.slug || product.id}`;
+    const identifier = product.slug || product.id;
+    window.location.href = `/shop/${identifier}`;
   };
 
   const handleEdit = (product) => {
@@ -154,10 +158,11 @@ const ShopPage = () => {
   const handleSaved = (savedProduct) => {
     setProducts(prev => {
       const exists = prev.find(p => p.id === savedProduct.id);
-      if (exists) return prev.map(p => p.id === savedProduct.id ? savedProduct : p);
+      if (exists){ return prev.map(p => p.id === savedProduct.id ? savedProduct : p);}
       return [savedProduct, ...prev];
     });
     setModalOpen(false);
+    setEditingProduct(null);
   };
 
   return (

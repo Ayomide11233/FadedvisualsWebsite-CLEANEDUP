@@ -136,29 +136,38 @@ class ProductService:
 
         count = 0
         for item in raw:
+        # 1. Handle Frames
             frames_raw = item.get("frames")
             frames = (
                 [FrameOption(label=fr["label"], color=fr.get("color")) for fr in frames_raw]
-                if frames_raw else None
+                if frames_raw else [] # Use empty list instead of None for better compatibility
             )
+
+            # 2. Map Image correctly
+            # Check for 'image_url' first, then fall back to 'image'
+            img = item.get("image_url") or item.get("image")
+
             req = ProductCreateRequest(
-                slug=item["id"],                        # "id" field in JSON becomes slug
+                # Use the string 'id' from JSON as the 'slug'
+                slug=str(item["id"]), 
                 title=item["title"],
                 price=float(item["price"]),
                 category=item.get("category", "prints"),
-                image_url=item.get("image"),
+                image_url=img,
                 description=item.get("description"),
                 details=item.get("details"),
                 shipping=item.get("shipping"),
-                sizes=item.get("sizes"),
+                sizes=item.get("sizes", []),
                 frames=frames,
                 in_stock=True,
             )
+            
             try:
                 self._repo.create(req)
                 count += 1
             except Exception as exc:
-                logger.warning("Skipping seed row '%s': %s", item.get("id"), exc)
+                # This will tell you EXACTLY why a row failed (e.g., "id must be int")
+                logger.error("Failed to seed product '%s': %s", item.get("id"), exc)
 
         logger.info("Seeded %d products from %s", count, json_path)
         return count

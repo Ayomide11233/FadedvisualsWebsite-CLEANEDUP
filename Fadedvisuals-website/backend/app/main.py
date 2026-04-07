@@ -45,7 +45,7 @@ async def lifespan(app: FastAPI):
         # Seed products from JSON if the table is empty
         _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         # Note: Adjust path if your products.json is in a different subfolder
-        json_path = os.path.join(_BASE_DIR, "app", "models", "products.json")
+        json_path = os.path.join(_BASE_DIR, "models", "products.json")
         
         db = SessionLocal()
         try:

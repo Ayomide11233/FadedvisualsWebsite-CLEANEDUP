@@ -73,7 +73,7 @@ const AdminProductModal = ({ isOpen, onClose, product, onSaved }) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (product) {
+    if (isEdit && product) {
       setForm({
         slug: product.slug || '',
         title: product.title || '',
@@ -141,7 +141,13 @@ const AdminProductModal = ({ isOpen, onClose, product, onSaved }) => {
   
     // 2. THE FIX: Get the numeric ID for the URL path
     // Using product.id (the integer) instead of product.slug (the string)
-    const productId = product?.id || product?._id;
+    const productId = parseInt(product?.id || product?._id);
+
+    if (isEdit && (productId === undefined || productId === null || isNaN(productId))) {
+      console.error("DEBUG: The product object is missing an ID:", product);
+      setApiError("Technical Error: Product ID is missing. Check console.");
+      return;
+    }
   
     // If editing, we MUST have a numeric ID or the backend returns 422
     const url = isEdit ? `${baseUrl}/${productId}` : `${baseUrl}/`;
