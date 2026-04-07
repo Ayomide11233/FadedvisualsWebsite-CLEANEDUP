@@ -38,10 +38,10 @@ const ProductDetailPage = () => {
       try {
         // We grab the slug/id from the URL (pathParts logic)
         const pathParts = window.location.pathname.split('/');
-        const identifier = pathParts[pathParts.length - 1];
+        const productId = pathParts[pathParts.length - 1];
   
         // Call your API (adjust the URL if your API uses /products/id)
-        const res = await fetch(`${'http://localhost:8000'}/products/${identifier}`);
+        const res = await fetch(`${'http://localhost:8000'}/products/${productId}`);
         
         if (!res.ok) throw new Error('Product not found');
         
@@ -50,6 +50,7 @@ const ProductDetailPage = () => {
         // Handle SQLite JSON strings if necessary
         const parsedProduct = {
           ...data,
+          image: data.image_url || data.image,
           sizes: typeof data.sizes_json === 'string' ? JSON.parse(data.sizes_json) : (data.sizes || []),
           frames: typeof data.frames_json === 'string' ? JSON.parse(data.frames_json) : (data.frames || null)
         };

@@ -165,6 +165,7 @@ const AdminProductModal = ({ isOpen, onClose, product, onSaved }) => {
         details: form.details,
         shipping: form.shipping,
         sizes: form.sizes,
+        id: parseInt(product.id),
         // Default to empty list if no frames; FastAPI models prefer [] over null
         frames: form.hasFrames ? DEFAULT_FRAMES : [],
         in_stock: form.in_stock,

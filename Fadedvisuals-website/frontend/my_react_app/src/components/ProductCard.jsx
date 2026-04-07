@@ -31,7 +31,7 @@ const ProductCard = ({ product, index, onClick, isAdmin, onEdit }) => {
         transition: { duration: 0.3, ease: 'easeInOut' },
       }}
       whileTap={{ scale: 0.98 }}
-      onClick={() => onClick(product)}
+      onClick={() => onClick(product)} // This passes the whole 'product' object to ShopPage
       className="group relative cursor-pointer"
     >
       {/* Image container */}

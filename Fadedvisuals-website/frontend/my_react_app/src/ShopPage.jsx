@@ -140,10 +140,12 @@ const ShopPage = () => {
   }, [activeCategory, products]);
 
   // Navigate to product detail
-  const handleProductClick = (product) => {
-    const identifier = product.slug || product.id;
-    window.location.href = `/shop/${identifier}`;
-  };
+  // ── 1. FIXED: Use product.id instead of a non-existent productId ───────
+const handleProductClick = (product) => {
+  // 'product' is the object being passed from the click
+  // 'id' is the number (1, 2, 3, 4) from your database
+  window.location.href = `/shop/${product.id}`;
+};  
 
   const handleEdit = (product) => {
     setEditingProduct(product);
