@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getProductImage } from '../utils/imageUtils';
 import CartQuantitySelector from './CartQuantitySelector';
 import { calculatePrice, formatPrice } from '../utils/pricing';
 
@@ -32,7 +33,7 @@ const CartItem = ({ item, onQuantityChange, onRemove, index }) => {
             {/* Image */}
             <div className="relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 border border-purple-500/10">
               <img
-                src={item.image}
+                src={getProductImage(item)}
                 alt={item.title}
                 className="w-full h-full object-cover"
               />
