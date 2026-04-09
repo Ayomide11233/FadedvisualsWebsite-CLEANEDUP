@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
+import { getProductImage } from '../utils/imageUtils'; // adjust path as needed
 
 // --- Helper to determine if product is actually in stock ---
 const isProductAvailable = (product) => {
@@ -14,6 +15,7 @@ const ProductCard = ({ product, index, onClick, isAdmin, onEdit }) => {
   const inView = useInView(ref, { once: true, margin: '-50px' });
 
   const available = isProductAvailable(product);
+  const imageSource = getProductImage(product);
 
   const handleEdit = (e) => {
     e.stopPropagation(); // Prevents navigating to product detail when clicking edit
@@ -48,7 +50,7 @@ const ProductCard = ({ product, index, onClick, isAdmin, onEdit }) => {
         {/* Image Wrapper */}
         <div className="relative w-full h-full overflow-hidden rounded-2xl border border-purple-500/10 group-hover:border-purple-500/30 transition-colors duration-300">
           <motion.img
-            src={product.image_url || product.image}
+            src={imageSource}
             alt={product.title}
             className="w-full h-full object-cover"
             style={{ filter: available ? 'brightness(0.95)' : 'brightness(0.5) grayscale(0.5)' }}

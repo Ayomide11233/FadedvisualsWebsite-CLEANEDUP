@@ -32,7 +32,7 @@ UPLOAD_DIR = os.path.join(
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
-MAX_FILE_SIZE_MB = 10
+MAX_FILE_SIZE_MB = 65
 
 
 class ProductService:

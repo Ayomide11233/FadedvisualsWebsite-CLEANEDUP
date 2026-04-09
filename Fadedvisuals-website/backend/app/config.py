@@ -44,7 +44,7 @@ class Settings:
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
 
     # ── Request limits ───────────────────────────────────────
-    MAX_REQUEST_BODY_SIZE: int = 1024 * 64  # 64 KB
+    MAX_REQUEST_BODY_SIZE: int = 65 * 1024 * 1024  # 64 KB
     MAX_CHAT_MESSAGE_LENGTH: int = 1_000    # characters
 
     # ── Chatbot guardrails ───────────────────────────────────

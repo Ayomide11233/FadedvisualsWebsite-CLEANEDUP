@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { getProductImage } from './utils/imageUtils'; // adjust path as needed
 import { motion } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -205,7 +206,7 @@ const ProductDetailPage = () => {
               {/* Image container */}
               <div className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-purple-500/20">
                 <img
-                  src={product.image_url || product.image}
+                  src={getProductImage(product)}
                   alt={product.title}
                   className="w-full h-full object-cover"
                 />

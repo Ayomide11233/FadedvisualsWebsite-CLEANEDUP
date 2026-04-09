@@ -141,11 +141,12 @@ const AdminProductModal = ({ isOpen, onClose, product, onSaved }) => {
   
     // 2. THE FIX: Get the numeric ID for the URL path
     // Using product.id (the integer) instead of product.slug (the string)
-    const productId = parseInt(product?.id || product?._id);
+    const productId = product ? parseInt(product.id || product._id) : null;
 
     if (isEdit && (productId === undefined || productId === null || isNaN(productId))) {
       console.error("DEBUG: The product object is missing an ID:", product);
       setApiError("Technical Error: Product ID is missing. Check console.");
+      setLoading(false);
       return;
     }
   
@@ -165,8 +166,9 @@ const AdminProductModal = ({ isOpen, onClose, product, onSaved }) => {
         details: form.details,
         shipping: form.shipping,
         sizes: form.sizes,
-        id: parseInt(product.id),
+        // id: parseInt(product.id),
         // Default to empty list if no frames; FastAPI models prefer [] over null
+        ...(isEdit && { id: productId }),
         frames: form.hasFrames ? DEFAULT_FRAMES : [],
         in_stock: form.in_stock,
       };
