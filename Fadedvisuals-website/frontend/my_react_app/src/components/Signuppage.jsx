@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import { FcGoogle } from 'react-icons/fc'; 
+import { FaApple } from 'react-icons/fa';
 import { API_ROUTES } from '../config/api';
 
 const Signuppage = ({ onSignUpSuccess, onToggleMode = () => console.log("Toggle missing!") }) => {
@@ -13,6 +15,17 @@ const Signuppage = ({ onSignUpSuccess, onToggleMode = () => console.log("Toggle 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+
+   // --- Social Login Handlers ---
+   const handleGoogleSignup = () => {
+    // Typically redirects to your FastAPI backend endpoint
+    window.location.href = `${API_ROUTES.BASE_URL}/auth/google/login`;
+  };
+
+  const handleAppleSignup = () => {
+    window.location.href = `${API_ROUTES.BASE_URL}/auth/apple/login`;
+  };
+  // -----------------------------
 
   const handleChange = (e) => {
     setFormData({
@@ -217,6 +230,35 @@ const Signuppage = ({ onSignUpSuccess, onToggleMode = () => console.log("Toggle 
             </button>
           </div>
         </form>
+
+        {/* --- OR Divider --- */}
+        <div className="mt-6">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-700"></div></div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-gray-900 px-2 text-gray-400">Or continue with</span>
+            </div>
+          </div>
+
+          {/* --- Social Buttons --- */}
+          <div className="mt-6 grid grid-cols-2 gap-4">
+            <button
+              onClick={handleGoogleSignup}
+              className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+            >
+              <FcGoogle size={20} />
+              <span className="text-sm font-semibold leading-6">Google</span>
+            </button>
+
+            <button
+              onClick={handleAppleSignup}
+              className="flex w-full items-center justify-center gap-3 rounded-md bg-black px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-800"
+            >
+              <FaApple size={20} />
+              <span className="text-sm font-semibold leading-6">Apple</span>
+            </button>
+          </div>
+        </div>
 
         {/* Toggle to Login */}
         <p className="mt-10 text-center text-sm text-gray-400">

@@ -17,7 +17,7 @@ load_dotenv()
 class Settings:
     # ── Security ────────────────────────────────────────────
     SECRET_KEY: str = os.getenv("SECRET_KEY", "")
-    ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
+    ALGORITHM: str = os.getenv("ALGORITHM")
     ACCESS_TOKEN_EXPIRE_HOURS: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_HOURS", "24"))
 
     # ── Database ─────────────────────────────────────────────

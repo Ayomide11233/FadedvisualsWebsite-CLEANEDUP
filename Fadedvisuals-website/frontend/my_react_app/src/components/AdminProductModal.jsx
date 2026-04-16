@@ -176,7 +176,7 @@ const AdminProductModal = ({ isOpen, onClose, product, onSaved }) => {
       const res = await fetch(url, {
         method,
         headers: { 
-          'Content-Type': 'application/json', 
+          // 'Content-Type': 'application/json', 
           'Authorization': `Bearer ${token}` 
         },
         body: JSON.stringify(payload),

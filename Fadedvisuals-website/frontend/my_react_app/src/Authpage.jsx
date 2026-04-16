@@ -1,8 +1,67 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FcGoogle } from 'react-icons/fc'; 
+import { FaApple } from 'react-icons/fa';
 
 // ── Config ────────────────────────────────────────────────────────────────────
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+
+
+// --- Create this reusable component ---
+const SocialLogins = () => {
+  const handleSocialLogin = (provider) => {
+    // Redirects to your FastAPI backend OAuth endpoint
+    window.location.href = `${API_BASE}/api/auth/${provider}/login`;
+  };
+
+  return (
+    <div style={{ marginTop: '24px' }}>
+      <div style={{ position: 'relative', marginBottom: '20px' }}>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center' }}>
+          <div style={{ width: '100%', borderTop: '1px solid rgba(255,255,255,0.07)' }}></div>
+        </div>
+        <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', fontSize: '0.65rem' }}>
+          <span style={{ background: '#251a31', padding: '0 10px', color: '#6b7280', fontFamily: "'Unbounded', sans-serif", textTransform: 'uppercase' }}>
+            Or continue with
+          </span>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+        <motion.button
+          whileHover={{ scale: 1.02, background: 'rgba(255,255,255,0.08)' }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => handleSocialLogin('google')}
+          type="button"
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+            padding: '10px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)',
+            background: 'rgba(255,255,255,0.03)', color: '#fff', cursor: 'pointer',
+            fontFamily: "'Inter', sans-serif", fontSize: '0.8rem'
+          }}
+        >
+          <FcGoogle size={18} /> Google
+        </motion.button>
+
+        <motion.button
+          whileHover={{ scale: 1.02, background: 'rgba(255,255,255,0.08)' }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => handleSocialLogin('apple')}
+          type="button"
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+            padding: '10px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.1)',
+            background: 'rgba(255,255,255,0.03)', color: '#fff', cursor: 'pointer',
+            fontFamily: "'Inter', sans-serif", fontSize: '0.8rem'
+          }}
+        >
+          <FaApple size={18} /> Apple
+        </motion.button>
+      </div>
+    </div>
+  );
+};
 
 // ── Validation (mirrors backend Pydantic rules) ───────────────────────────────
 const validateSignup = ({ username, email, password }) => {
@@ -231,6 +290,8 @@ const LoginForm = ({ onSuccess, onSwitch }) => {
 
       <SubmitButton loading={loading}>Sign In</SubmitButton>
 
+      <SocialLogins />
+
       <p style={{ textAlign: 'center', marginTop: '20px', color: '#6b7280', fontSize: '0.8rem', fontFamily: "'Inter', sans-serif" }}>
         No account?{' '}
         <button type="button" onClick={onSwitch} style={{ background: 'none', border: 'none', color: '#c084fc', cursor: 'pointer', fontSize: '0.8rem', fontFamily: "'Inter', sans-serif" }}>
@@ -305,6 +366,9 @@ const SignupForm = ({ onSuccess, onSwitch }) => {
 
       <SubmitButton loading={loading}>Create Account</SubmitButton>
 
+      <SocialLogins />
+
+
       <p style={{ textAlign: 'center', marginTop: '20px', color: '#6b7280', fontSize: '0.8rem', fontFamily: "'Inter', sans-serif" }}>
         Already have an account?{' '}
         <button type="button" onClick={onSwitch} style={{ background: 'none', border: 'none', color: '#c084fc', cursor: 'pointer', fontSize: '0.8rem', fontFamily: "'Inter', sans-serif" }}>
@@ -375,6 +439,30 @@ const AuthPage = () => {
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const userString = params.get('user');
+
+    if (token && userString) {
+      try {
+        const user = JSON.parse(userString);
+        
+        // Save to local storage (matches your LoginForm logic)
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        
+        // Update state to show the "SuccessState" component
+        setAuthData({ access_token: token, user: user });
+
+        // Clean the URL so the token doesn't sit in the address bar
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } catch (err) {
+        console.error("Failed to parse social login user data", err);
+      }
+    }
   }, []);
 
   const handleSuccess = data => setAuthData(data);
