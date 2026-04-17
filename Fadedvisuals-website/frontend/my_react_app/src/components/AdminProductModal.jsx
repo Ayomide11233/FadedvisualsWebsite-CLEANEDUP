@@ -160,11 +160,11 @@ const AdminProductModal = ({ isOpen, onClose, product, onSaved }) => {
         title: form.title.trim(),
         // Remove special characters like ./ from the slug before sending
         slug: form.slug.toLowerCase().replace(/[^a-z0-9-]/g, ''),
-        price: Number(form.price),
+        price: parseFloat(form.price),
         category: form.category,
-        description: form.description,
-        details: form.details,
-        shipping: form.shipping,
+        description: form.description || "",
+        details: form.details || "",
+        shipping: form.shipping || "",
         sizes: form.sizes,
         // id: parseInt(product.id),
         // Default to empty list if no frames; FastAPI models prefer [] over null
@@ -172,11 +172,15 @@ const AdminProductModal = ({ isOpen, onClose, product, onSaved }) => {
         frames: form.hasFrames ? DEFAULT_FRAMES : [],
         in_stock: form.in_stock,
       };
+
+      if (isEdit) {
+        payload.id = productId;
+      }
   
       const res = await fetch(url, {
         method,
         headers: { 
-          // 'Content-Type': 'application/json', 
+          'Content-Type': 'application/json', 
           'Authorization': `Bearer ${token}` 
         },
         body: JSON.stringify(payload),
