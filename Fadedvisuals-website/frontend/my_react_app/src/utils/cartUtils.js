@@ -60,6 +60,7 @@ export const addToCart = (product, selectedSize, selectedFrame, quantity = 1) =>
       title: product.title,
       image: product.image,
       price: product.price,
+      image_url: product.image_url,
       size: selectedSize,
       frame: selectedFrame || 'No Frame',
       quantity,

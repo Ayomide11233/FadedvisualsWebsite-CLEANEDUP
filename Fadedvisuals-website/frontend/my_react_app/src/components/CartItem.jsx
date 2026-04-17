@@ -4,7 +4,21 @@ import { getProductImage } from '../utils/imageUtils';
 import CartQuantitySelector from './CartQuantitySelector';
 import { calculatePrice, formatPrice } from '../utils/pricing';
 
+
+
+
 const CartItem = ({ item, onQuantityChange, onRemove, index }) => {
+  console.log("DEBUG: Cart Item Data:", item);
+  // 1. Determine the Image Source
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  
+  // 2. Simple Error Handler that only runs ONCE
+  const handleImgError = (e) => {
+    if (e.target.src !== 'https://placehold.co/400x500?text=Error') {
+      e.target.src = 'https://placehold.co/400x500?text=Error';
+    }
+  };
+
   // Calculate item subtotal with upcharges
   const priceData = calculatePrice(item.price, item.size, item.frame, item.quantity);
 
@@ -26,17 +40,19 @@ const CartItem = ({ item, onQuantityChange, onRemove, index }) => {
           borderColor: 'rgba(168,85,247,0.15)',
         }}
       >
+       
         {/* Grid layout */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
           {/* Product info - Image + Name */}
           <div className="md:col-span-5 flex items-center gap-4">
             {/* Image */}
             <div className="relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 border border-purple-500/10">
-              <img
-                src={getProductImage(item)}
-                alt={item.title}
-                className="w-full h-full object-cover"
-              />
+            <img 
+            src={getProductImage(item)} 
+            alt={item?.title || "Product"}
+            className="w-full h-full object-cover"
+            onError={handleImgError}
+            />
               <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a]/40 to-transparent" />
             </div>
 
